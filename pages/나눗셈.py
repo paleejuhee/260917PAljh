@@ -206,6 +206,20 @@ def generate_problem(difficulty):
         "suspects": generate_suspects(answer)
     }
 
+# 유효한 사건 데이터 검사
+def is_valid_case_data(case_data):
+    required_keys = {"dividend", "divisor", "answer", "title", "story", "suspect_label", "suspects"}
+    return (
+        isinstance(case_data, dict)
+        and required_keys.issubset(case_data.keys())
+        and isinstance(case_data["suspects"], list)
+    )
+
+# 상태에 저장된 case_data가 없거나 손상된 경우 새로 생성
+if st.session_state.difficulty is not None and not is_valid_case_data(st.session_state.case_data):
+    st.session_state.case_data = generate_problem(st.session_state.difficulty)
+    st.session_state.correct_answer = st.session_state.case_data["answer"]
+
 # 페이지 제목
 st.markdown("""
 <div style="text-align: center; padding: 30px 20px; animation: fadeIn 0.8s ease-out;">
@@ -268,7 +282,7 @@ else:
     st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
     
     # 사건 카드
-    if st.session_state.case_data:
+    if is_valid_case_data(st.session_state.case_data):
         case = st.session_state.case_data
         
         st.markdown(f"""
